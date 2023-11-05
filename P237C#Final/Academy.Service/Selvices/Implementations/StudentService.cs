@@ -2,60 +2,84 @@
 
 using Academy.Core.Enums;
 using Academy.Core.Modes;
+using Academy.Core.Repositories;
+using Academy.Data.Repositories;
 using Academy.Service.Selvices.Interfaces;
-using System.Collections.ObjectModel;
+
 
 namespace Academy.Service.Selvices.Implementations
 {
-    internal class StudentService : IStudentService
+    public class StudentService : IStudentService
     {
-        IStudentRepsitory _studentRepsitory = new StudentRepsitory();
-        private IEnumerable<object> collection;
-        private IEnumerable<Student> studens;
-        private object student;
-
-        public  async Task<string> CreateAsync(string fullName, string group, int average, Education education)
+        StudentRepository _istudentRepository = new StudentRepository();
+        
+        public async Task<string> CreateAsync(string fullName, string group, int average, Education education)
         {
-            if(string .IsNullOrWhiteSpace(fullName))
-              return "fullName can not be empaty ";
-
-            if (string.IsNullOrWhiteSpace(group))
-                return "group can not be empty ";
-
-            if (average <0&& average>100)
-                return "Price can not less than 0";
-
-            Student student = new Student(fullName,group,average,education);
-           await _studentRepsitory.AddAsync(student);
-
-            return "Successfully created";
-
-
+            if (string.IsNullOrEmpty(fullName))
+                return "Full name is can not be empty";
+            if (string.IsNullOrEmpty(group))
+                return "Full name is can not be empty";
+            if (average<0 &&average>100)
+                return "0-100";
+            Student student = new Student(fullName, group, average,education);
+            student.CreatedAt = DateTime.UtcNow.AddHours(4);
+            await _istudentRepository.AddAsync(student);
+            return "Created succefully";
         }
 
-        public  async Task GetAllAsync()
+        public async Task GetAllAsync()
         {
-            List<Product> products = _studentRepsitory.GetAllAsync();
-            foreach (Student student  in studens) ;
+            List<Student> students = await _istudentRepository.GetAllAsync();
+
+            foreach(Student student in students)
             {
-                Console.WriteLine($"Id:{student.Id} fullName:{student group}average{student group}"  );
+                 Console.WriteLine($"Id:{student. Id}FullName:{student. FullName}Group:{student .Group }Average:{student .Average }Education:{student .Education }CreatedAt:{student .CreatedAt}UpdatedAt:{student .UpdateAt}"  );
+
             }
-            
+             
+        }
+        public async Task<string> RemoveAsync(string id)
+        {
+            Student student = await _istudentRepository.GetAsync(x => x.Id == id);
+            if (student == null)
+                return "Student not found";
+            Console.WriteLine($"Id:{student.Id}FullName:{student.FullName}Group:{student.Group}Average:{student.Average}Education:{student.Education}CreateAt:{student.CreatedAt}UpdatedAt:{student.UpdateAt}");
+            return "Success";
         }
 
-        public Task<string> GetAsync(string id)
+        public async  Task<string> GetAsync(string id)
         {
-            throw new NotImplementedException();
+            Student student = await _istudentRepository.GetAsync(x => x.Id == id);
+            if (student == null)
+                return "Student not found";
+            await _istudentRepository.RemoveAsync(student);
+
+            return "Removed successfully";
+
         }
 
-        public Task<string> RemoveAsync(string id)
-        {
-            throw new NotImplementedException();
-        }
+        
 
-        public Task<string> UpdateAsync(string fullName, string group, int average, Education education)
+        public  async Task<string> UpdateAsync(string id, string fullName, string group, int average, Education education)
         {
-            throw new NotImplementedException();
+            Student student = await _istudentRepository.GetAsync(x => x.Id == id);
+
+            if (student == null)
+                return "Student not found";
+
+            if (string.IsNullOrEmpty(fullName))
+                return "Full name is can not be empty";
+            if (string.IsNullOrEmpty(group))
+                return "Full name is can not be empty";
+            if (average < 0 && average > 100)
+                return "0-100";
+
+            student.FullName = fullName;
+            student.Group = group;
+            student.Average = average;
+            student.Education = education;
+            student.UpdateAt = DateTime.UtcNow.AddHours(4);
+            return "Updated successfully";
         }
     }
 }

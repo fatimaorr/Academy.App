@@ -8,6 +8,10 @@ namespace Academy.Core.Modes
 
     {
         static int _id;
+        public object fullName;
+        public object group;
+        public object average;
+
         public string FullName { get; set; }
         public string Group { get; set; }
         public int Average { get; set; }
@@ -24,6 +28,8 @@ namespace Academy.Core.Modes
             Id = $"{Education.ToString()[0]}-{_id}";
 
         }
+
+       
     } 
       
 
